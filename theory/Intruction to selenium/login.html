@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Portal - Sign In</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-surface: #ffffff;
+            --bg-app: #f8fafc;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --error-color: #dc2626;
+            --error-bg: #fef2f2;
+            --radius: 8px;
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-app);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: var(--bg-surface);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h2 {
+            color: var(--text-main);
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .label-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        label {
+            display: block;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .input-group .label-wrapper label {
+            margin-bottom: 0;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 15px;
+            color: var(--text-main);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        input.input-error {
+            border-color: var(--error-color);
+        }
+
+        input.input-error:focus {
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+        }
+
+        .error-message {
+            display: block;
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 6px;
+            min-height: 16px;
+        }
+
+        .context-link {
+            color: var(--primary-color);
+            font-size: 13px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .context-link:hover {
+            text-decoration: underline;
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .checkbox-container input {
+            margin-right: 8px;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--primary-color);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .alert-banner {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-color);
+            color: var(--error-color);
+            padding: 12px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Loading Spinner Animation */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Welcome Back</h2>
+            <p>Please enter your credentials to access your account</p>
+        </div>
+        
+        <div class="alert-banner" id="globalAlert" aria-live="assertive" hidden></div>
+
+        <form id="loginForm" novalidate>
+            <div class="input-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="name@company.com" 
+                    required 
+                    maxlength="255"
+                    autocomplete="username"
+                >
+                <span class="error-message" id="emailError" aria-live="polite"></span>
+            </div>
+
+            <div class="input-group">
+                <div class="label-wrapper">
+                    <label for="password">Password</label>
+                    <a href="#forgot-password" class="context-link">Forgot password?</a>
+                </div>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="••••••••" 
+                    required 
+                    minlength="8" 
+                    maxlength="64"
+                    autocomplete="current-password"
+                >
+                <span class="error-message" id="passwordError" aria-live="polite"></span>
+            </div>
+
+            <div class="form-actions">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="rememberMe" name="rememberMe">
+                    Keep me signed in
+                </label>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-primary">
+                <span class="btn-text">Sign In</span>
+                <div class="spinner" id="btnSpinner" hidden></div>
+            </button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const globalAlert = document.getElementById('globalAlert');
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = submitBtn.querySelector('.btn-text');
+            const spinner = document.getElementById('btnSpinner');
+
+            // Email Format Standard Regex Pattern
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            // UI helper states
+            const setInvalid = (input, errorSpan, message) => {
+                input.classList.add('input-error');
+                errorSpan.textContent = message;
+            };
+
+            const clearInvalid = (input, errorSpan) => {
+                input.classList.remove('input-error');
+                errorSpan.textContent = '';
+            };
+
+            // Input handlers to instantly clear dynamic test tracking markers on type
+            emailInput.addEventListener('input', () => clearInvalid(emailInput, emailError));
+            passwordInput.addEventListener('input', () => clearInvalid(passwordInput, passwordError));
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Clear previous runtime errors
+                globalAlert.hidden = true;
+                let isValid = true;
+
+                const emailValue = emailInput.value.trim();
+                const passwordValue = passwordInput.value;
+
+                // 1. Validate Email Presence & Formatting
+                if (!emailValue) {
+                    setInvalid(emailInput, emailError, 'Email address is required.');
+                    isValid = false;
+                } else if (!emailRegex.test(emailValue)) {
+                    setInvalid(emailInput, emailError, 'Please enter a valid email format.');
+                    isValid = false;
+                }
+
+                // 2. Validate Password Presence & Boundary Limits
+                if (!passwordValue) {
+                    setInvalid(passwordInput, passwordError, 'Password is required.');
+                    isValid = false;
+                } else if (passwordValue.length < 8) {
+                    setInvalid(passwordInput, passwordError, 'Password must be at least 8 characters long.');
+                    isValid = false;
+                }
+
+                if (!isValid) return;
+
+                // 3. Enter Loading state (Prevents duplicate form submissions)
+                submitBtn.disabled = true;
+                btnText.textContent = 'Verifying...';
+                spinner.hidden = false;
+
+                try {
+                    // API Call validation worker hook
+                    const response = await simulateAuthAPI(emailValue, passwordValue);
+                    
+                    if (response.success) {
+                        alert('Login Successful! Route to app dashboard confirmed.');
+                    } else {
+                        // Negative verification outcome handler
+                        globalAlert.textContent = response.message;
+                        globalAlert.hidden = false;
+                    }
+                } catch (error) {
+                    // Exception Handling Block
+                    globalAlert.textContent = 'A system error occurred. Please try again later.';
+                    globalAlert.hidden = false;
+                } finally {
+                    // Revert state pipeline markers 
+                    submitBtn.disabled = false;
+                    btnText.textContent = 'Sign In';
+                    spinner.hidden = true;
+                }
+            });
+
+            // Mock Back-end API Endpoint for scenario confirmation
+            function simulateAuthAPI(email, password) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        // Valid credentials test case anchor
+                        if (email === "admin@company.com" && password === "password123") {
+                            resolve({ success: true });
+                        } else {
+                            resolve({ 
+                                success: false, 
+                                message: "The email or password you entered is incorrect." 
+                            });
+                        }
+                    }, 1200); // 1.2-second network barrier simulation
+                });
+            }
+        });
+    </script>
+</body>
+</html>
